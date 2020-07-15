@@ -1,0 +1,1 @@
+C:\WORK\CONTRACTS\WorldVision\Umbraco-Evaluation\Umbraco.AzureResourceGroup\obj\Debug\Umbraco.AzureResourceGroup.deployproj.CoreCompileInputs.cache

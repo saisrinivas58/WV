@@ -1,0 +1,209 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"administratorLogin": {
+			"type": "string"
+		},
+		"administratorLoginPassword": {
+			"type": "securestring"
+		},
+		"GitHubFetcherWebServiceURI": {
+			"type": "string"
+		},
+		"_GitHubLocation": {
+			"type": "string"
+		},
+		"_GitHubAccessToken": {
+			"type": "string"
+		},
+		"environmentName": {
+			"type": "string"
+		},
+		"frontendCertData": {
+			"type": "string"
+		},
+		"frontendCertPassword": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"nestedApplicationGatewayTemplateFile": "[concat(parameters('GitHubFetcherWebServiceURI'), '?githuburi=', parameters('_GitHubLocation'), '/', 'deployApplicationgateway.template.json', '&githubaccesstoken=', parameters('_GitHubAccessToken'))]",
+		"nestedAppNetworkSecurityTemplateFile": "[concat(parameters('GitHubFetcherWebServiceURI'), '?githuburi=', parameters('_GitHubLocation'), '/', 'appNetworkSecurity.template.json', '&githubaccesstoken=', parameters('_GitHubAccessToken'))]",
+		"nestedSqlNetworkSecurityTemplateFile": "[concat(parameters('GitHubFetcherWebServiceURI'), '?githuburi=', parameters('_GitHubLocation'), '/', 'sqlNetworkSecurity.template.json', '&githubaccesstoken=', parameters('_GitHubAccessToken'))]",
+		"apiVersion": "2017-05-10",
+		"contentVersion": "1.0.0.0",
+		"mode": "Incremental",
+		"sqlserverName": "[toLower(concat(parameters('environmentName'), '-sql-server'))]",
+		"webSiteName": "[toLower(concat(parameters('environmentName'), '-Webapp'))]",
+		"applicationGatewayname": "[concat(parameters('environmentName'), '-AGW')]",
+		"virtualNetworkName": "[concat(parameters('environmentName'), '-Vnet')]",
+		"publicIPAddressName": "[concat(parameters('environmentName'), '-PIP')]",
+		"resourceGroupShared": "[concat(parameters('environmentName'), '-RG')]",
+		"sqlNetworkSecurityTemplate": "sqlNetworkSecurityTemplate",
+		"appNetworkSecurityTemplate": "appNetworkSecurityTemplate",
+		"applicationGatewayTemplate": "applicationGatewayTemplate",
+		"backendAddressPools": "AppGatewayBackendPool",
+		"httpListener": "HttpListener",
+		"requestRoutingRules": "Rule1",
+		"backendHttpSettingsCollection": "HttpSettings",
+		"tier": "Standard_v2",
+		"skuSize": "Standard_v2",
+		"webAppSubnetBlue": "[concat(parameters('environmentName'), '-Webapp-Subnet')]",
+		"webAppSubnetGreen": "[concat(parameters('environmentName'), '-Webapp-Green-Subnet')]",
+		"location": "[resourceGroup().location]"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('apiVersion')]",
+			"name": "[variables('applicationGatewayTemplate')]",
+			"dependsOn": [
+				
+			],
+			"properties": {
+				"mode": "[variables('mode')]",
+				"templateLink": {
+					"uri": "[variables('nestedApplicationGatewayTemplateFile')]",
+					"contentVersion": "[variables('contentVersion')]"
+				},
+				"parameters": {
+					"webSiteName": {
+						"value": "[variables('webSiteName')]"
+					},
+					"subnetName": {
+						"value": "[parameters('environmentName')]"
+					},
+					"webAppSubnetBlue": {
+						"value": "[variables('webAppSubnetBlue')]"
+					},
+					"webAppSubnetGreen": {
+						"value": "[variables('webAppSubnetGreen')]"
+					},
+					"backendHttpSettingsCollection": {
+						"value": "[variables('backendHttpSettingsCollection')]"
+					},
+					"resourceGroupShared": {
+						"value": "[variables('resourceGroupShared')]"
+					},
+					"applicationGatewayName": {
+						"value": "[variables('applicationGatewayName')]"
+					},
+					"tier": {
+						"value": "[variables('tier')]"
+					},
+					"skuSize": {
+						"value": "[variables('skuSize')]"
+					},
+					"capacity": {
+						"value": 2
+					},
+					"virtualNetworkName": {
+						"value": "[variables('virtualNetworkName')]"
+					},
+					"virtualNetworkPrefix": {
+						"value": [
+							"10.1.0.0/16"
+						]
+					},
+					"zones": {
+						"value": []
+					},
+					"publicIpZones": {
+						"value": []
+					},
+					"publicIpAddressName": {
+						"value": "[variables('publicIPAddressName')]"
+					},
+					"backendAddressPools": {
+						"value": "[variables('backendAddressPools')]"
+					},
+					"httpListener": {
+						"value": "[variables('httpListener')]"
+					},
+					"requestRoutingRules": {
+						"value": "[variables('requestRoutingRules')]"
+					},
+					"frontendCertData": {
+						"value": "[parameters('frontendCertData')]"
+					},
+					"frontendCertPassword": {
+						"value": "[parameters('frontendCertPassword')]"
+					}
+				}
+			}
+		},
+		{
+			"apiVersion": "[variables('apiVersion')]",
+			"name": "[variables('appNetworkSecurityTemplate')]",
+			"type": "Microsoft.Resources/deployments",
+			"dependsOn": [
+			   "[variables('applicationGatewayTemplate')]"
+			],
+			"properties": {
+				"mode": "[variables('mode')]",
+				"templateLink": {
+					"uri": "[variables('nestedappNetworkSecurityTemplateFile')]",
+					"contentVersion": "[variables('contentVersion')]"
+				},
+				"parameters": {
+					"webSiteName": {
+						"value": "[variables('webSiteName')]"
+					},
+					"location": {
+						"value":"[variables('location')]"
+					},
+					"resourceGroupShared": {
+						"value": "[variables('resourceGroupShared')]"
+					},
+					"virtualNetworkName": {
+						"value": "[variables('virtualNetworkName')]"
+					},
+					"WebApp_SubnetID":{
+						"value": "[variables('webAppSubnetBlue')]"
+					},
+					"AppGateway_subnetID":{
+						"value": "[reference(variables('applicationGatewayTemplate')).outputs.AppGateway_subnetID.value]"
+					}
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('apiVersion')]",
+			"name": "[variables('sqlNetworkSecurityTemplate')]",
+			"dependsOn": [
+				"[variables('applicationgatewayTemplate')]"
+				],
+			"properties": {
+				"mode": "[variables('mode')]",
+				"templateLink": {
+					"uri": "[variables('nestedSqlNetworkSecurityTemplateFile')]",
+					"contentVersion": "[variables('contentVersion')]"
+				},
+				"parameters": {
+					"sqlserverName": {
+						"value": "[variables('sqlserverName')]"
+					},
+					"administratorLogin": {
+						"value": "[parameters('administratorLogin')]"
+					},
+					"administratorLoginPassword": {
+						"value": "[parameters('administratorLoginPassword')]"
+					},
+					"webAppSubnet": {
+						"value": "[variables('webAppSubnetBlue')]"
+					},
+					"resourceGroupShared": {
+						"value": "[variables('resourceGroupShared')]"
+					},
+				
+					"virtualNetworkName": {
+						"value": "[variables('virtualNetworkName')]"
+					}
+					
+				}
+			}
+		}
+	]
+}

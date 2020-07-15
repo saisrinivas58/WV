@@ -1,0 +1,65 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"administratorLogin": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "UMB-Login-Secret"
+	          }
+		},
+		"administratorLoginPassword": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "UMB-PWD-Secret"
+	          }
+		},
+		"GitHubFetcherWebServiceURI": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "Common-GitHub-Access-URL"
+	          }
+		},
+		"_GitHubLocation": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "UMB-Github-Location"
+	          }
+		},
+		"_GitHubAccessToken": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "Common-GitHub-Access-Token"
+	          }
+		},
+		"frontendCertData": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "UMB-Appgateway-Certificate"
+	          }
+		},
+		"frontendCertPassword": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "UMB-AGW-Certificate-PWD"
+	          }
+		},
+		"environmentName": {
+			"value": "UMB-CS-Staging-Germany"
+		}
+	}
+}

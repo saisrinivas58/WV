@@ -1,0 +1,84 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"webSiteName": {
+			"type": "string"
+		},
+		"AppLogs_url": {
+			"type": "string"
+		},
+		"location": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"publishingUsername": "[concat('$',parameters('webSiteName'))]",
+		"action": "Allow",
+		"name": "Allow all",
+		"description": "Allow all access"
+	},
+	"resources": [
+		{
+			"apiVersion": "2015-08-01",
+			"name": "[parameters('webSiteName')]",
+			"type": "Microsoft.Web/sites",
+			"location": "[parameters('location')]",
+			"dependsOn": [],
+			"properties": {
+				
+			},
+			"resources": [
+				{
+					"apiVersion": "2018-02-01",
+					"type": "config",
+					"name": "logs",
+					"dependsOn": [
+						"[concat('Microsoft.Web/sites/', parameters('webSiteName'))]"
+					],
+					"properties": {
+						"applicationLogs": {
+							"azureBlobStorage": {
+								"sasUrl": "[parameters('AppLogs_url')]",
+								"level": "Information",
+								"retentionInDays": 30
+							}
+						},
+						"httpLogs": {
+							"fileSystem": {
+								"retentioninMb": 35,
+								"retentioninDays": 30,
+								"enabled": true
+							}
+						},
+						"failedRequeststracing": {
+							"enabled": true
+						},
+						"detailederrormessages": {
+							"enabled": true
+						},
+						"webServerLogs": true,
+						"requestTracingEnabled": true,
+						"requestTracingExpirationTime": "9999-12-31T23:59:00Z",
+						"remoteDebuggingEnabled": false,
+						"httpLoggingEnabled": true,
+						"logsDirectorySizeLimit": 34,
+						"detailedErrorLoggingEnabled": true,
+						"netFrameworkVersion": "v4.0",
+						"phpVersion": "5.6",
+						"publishingUsername": "[variables('publishingUsername')]",
+						"scmType": "VSTSRM",
+						"use32BitWorkerProcess": true,
+						"webSocketsEnabled": false,
+						"alwaysOn": false,
+						"managedPipelineMode": "Integrated"
+						
+					}
+				}
+				
+        
+		
+			]
+		}
+	]
+}

@@ -1,0 +1,72 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"sqlserverName": {
+			"type": "string"
+		},
+		"administratorLogin": {
+			"type": "string"
+		},
+		"administratorLoginPassword": {
+			"type": "securestring"
+		},
+		"resourceGroupShared": {
+			"type": "string"
+		},
+		"virtualNetworkName": {
+			"type": "string"
+		},
+		"webAppSubnet": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"location": "[resourceGroup().location]",
+		"apiVersion": "2015-05-01-preview",
+		"subscriptionID": "[subscription().subscriptionId]",
+		"virtualNetwork_externalid": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/', parameters('resourceGroupShared'),'/providers/Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+	},
+	"resources": [
+		{
+			"name": "[parameters('sqlserverName')]",
+			"type": "Microsoft.Sql/servers",
+			"location": "[variables('location')]",
+			"tags": {
+				"displayName": "SqlServer"
+			},
+			"apiVersion": "[variables('apiVersion')]",
+			"properties": {
+				"administratorLogin": "[parameters('administratorLogin')]",
+				"administratorLoginPassword": "[parameters('administratorLoginPassword')]"
+			},
+			"resources": [
+				{
+					"type": "virtualNetworkRules",
+					"apiVersion": "[variables('apiVersion')]",
+					"name": "[concat(parameters('webAppSubnet'), '-VnetRule')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Sql/servers', parameters('sqlserverName'))]"
+					],
+					"properties": {
+						"virtualNetworkSubnetId": "[concat(variables('virtualNetwork_externalid'), '/subnets/',parameters('webAppSubnet'))]",
+						"ignoreMissingVnetServiceEndpoint": false
+					}
+				},
+				{
+					"type": "firewallrules",
+					"apiVersion": "[variables('apiVersion')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Sql/servers/', parameters('sqlserverName'))]"
+					],
+					"location": "[variables('location')]",
+					"name": "AllowAllWindowsAzureIps",
+					"properties": {
+						"endIpAddress": "0.0.0.0",
+						"startIpAddress": "0.0.0.0"
+					}
+				}
+			]
+		}
+	]
+}

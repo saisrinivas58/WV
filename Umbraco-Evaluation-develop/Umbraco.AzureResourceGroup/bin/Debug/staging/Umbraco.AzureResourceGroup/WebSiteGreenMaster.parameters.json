@@ -1,0 +1,69 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"administratorLogin": {
+			"value": "Login-Umbraco-Sandbox-Secret"
+		},
+		"administratorLoginPassword": {
+			"value": "PWD-Umbraco-Sandbox-Secret"
+		},
+		"ida:AADInstance": {
+			"reference": {
+				"keyVault": {
+					"id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+				},
+				"secretName": "Common-AADInstance-Digital-Collective"
+			}
+		},
+		"ida:ClientId": {
+			"reference": {
+				"keyVault": {
+					"id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+				},
+				"secretName": "Common-ClientId-Digital-Collective"
+			}
+		},
+		"ida:Domain": {
+			"reference": {
+				"keyVault": {
+					"id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+				},
+				"secretName": "Common-Domain-MS"
+			}
+		},
+		"GitHubFetcherWebServiceURI": {
+			"reference": {
+				"keyVault": {
+					"id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+				},
+				"secretName": "Common-GitHub-Access-URL"
+			}
+		},
+		"_GitHubLocation": {
+			"reference": {
+				"keyVault": {
+					"id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+				},
+				"secretName": "UMB-sandbox-Green-githublocation"
+			}
+		},
+		"_GitHubAccessToken": {
+			"reference": {
+				"keyVault": {
+					"id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+				},
+				"secretName": "Common-GitHub-Access-Token"
+			}
+		},
+        "frontendCertData": {
+			"value": "UMB-Sandbox-Appgatewaycertificate"
+		},
+	    "frontendCertPassword": {
+	      "value": "UMB-Sandbox-AGW-Certificate-PWD"
+	    },
+		"environmentName": {
+			"value": "UMB-Sandbox"
+		}
+	}
+}

@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|AnyCPU">
+      <Configuration>Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|AnyCPU">
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>5d7d0249-a666-41f8-95cb-99b7ea01ec93</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PrepareForBuildDependsOn>
+    </PrepareForBuildDependsOn>
+  </PropertyGroup>
+  <Import Condition=" Exists('Deployment.targets') " Project="Deployment.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+  <!-- vertag<:>start tokens<:>maj.min -->
+  <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
+  <!-- vertag<:>end -->
+  <ItemGroup>
+    <None Include="Deployment.targets">
+      <Visible>False</Visible>
+    </None>
+    <Content Include="Deploy-AzureResourceGroup.ps1" />
+    <Content Include="RemoveResourceGroup.ps1" />
+    <Content Include="Enableappinsights-Webapp-Blue.ps1" />
+    <Content Include="Enableappinsights-Webapp-Green.ps1" />
+    <Content Include="Deploy-AzureResourceGroup-Creation.ps1" />
+    <Content Include="AzureResourceGroup-Automation.ps1" />
+    <Content Include="Deploy-AzureKeyVault-Creation.ps1" />
+    <Content Include="RemoveResourceGroupResource.ps1" />
+    <Content Include="WebSiteBlueMaster.template.json" />
+    <Content Include="WebSiteGreenMaster.template.json" />
+    <Content Include="WebSiteBlueMaster.parameters.json" />
+    <Content Include="WebSiteGreenMaster.parameters.json" />
+    <Content Include="WebSiteGatewaySecurityBlueMaster.parameters.json" />
+    <Content Include="WebSiteGatewaySecurityBlueMaster.template.json" />
+    <Content Include="WebSiteGatewaySecurityGreenMaster.parameters.json" />
+    <Content Include="WebSiteGatewaySecurityGreenMaster.template.json" />
+    <Content Include="WebSiteGatewaySecurityMaster.parameters.json" />
+    <Content Include="WebSiteGatewaySecurityMaster.template.json" />
+    <Content Include="WebSiteMaster.parameters.json" />
+    <Content Include="WebSiteMaster.template.json" />
+  </ItemGroup>
+  <Target Name="GetReferenceAssemblyPaths" />
+</Project>

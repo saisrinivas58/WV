@@ -1,0 +1,85 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"webSiteName": {
+			"type": "string"
+		},
+		"location": {
+			"type": "string"
+		},
+		"virtualNetworkName": {
+			"type": "string"
+		},
+		"resourceGroupShared": {
+			"type": "string"
+		},
+		"WebApp_SubnetID": {
+			"type": "string"
+		},
+		"AppGateway_subnetID": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"publishingUsername": "[concat('$',parameters('webSiteName'))]",
+		"action": "Allow",
+		"name": "Allow all",
+		"subscriptionID": "[subscription().subscriptionId]",
+		"description": "Allow all access"
+	},
+	"resources": [
+		{
+			"apiVersion": "2015-08-01",
+			"name": "[parameters('webSiteName')]",
+			"type": "Microsoft.Web/sites",
+			"location": "[parameters('location')]",
+			"dependsOn": [],
+			"properties": {
+				
+			},
+			"resources": [
+				{
+					"type": "config",
+					"name": "virtualnetwork",
+					"apiVersion": "2018-02-01",
+					"location": "[parameters('location')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Web/sites', parameters('webSiteName'))]"
+					],
+					"properties": {
+						"subnetResourceId": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/', parameters('resourceGroupShared'),'/providers/Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'),'/subnets/',parameters('WebApp_SubnetID'))]",
+						"swiftSupported": true
+					}
+				},
+				{
+					"type": "config",
+					"apiVersion": "2018-11-01",
+					"name": "web",
+					"location": "[parameters('location')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Web/sites', parameters('webSiteName'))]"
+					],
+					"properties": {
+						"ipSecurityRestrictions": [
+							{
+								"vnetSubnetResourceId": "[parameters('AppGateway_subnetID')]",
+								"action": "[variables('action')]",
+								"tag": "Default",
+								"priority": 200,
+								"name": "allowapp gateway"
+							},
+							{
+								"ipAddress": "Any",
+								"action": "Deny",
+								"priority": 2147483647,
+								"name": "Deny all",
+								"description": "Deny all access"
+							}
+						]
+					}
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,92 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"webSiteName": {
+			"type": "string"
+		},
+		"ida:BankValidationApiBaseUrl": {
+			"type": "string"
+		},
+		"ida:BankValidationApiToken": {
+			"type": "string"
+		},
+		"ida:BankValidationApiVersion": {
+			"type": "string"
+		},
+		"outputStorageAccountNameReference": {
+			"type": "string"
+		},
+		"outputStorageContainerNameReference": {
+			"type": "string"
+		},
+		"outputStorageAccountKeyReference": {
+			"type": "string"
+		},
+		"AppInsightsInstrumentationKey": {
+			"type": "string"
+		},
+		"AppLogs_url": {
+			"type": "string"
+		},
+		"WebLogs_url": {
+			"type": "string"
+		},
+		"ida:ApiToken": {
+			"type": "string"
+		},
+		"ida:ApiBaseUrl": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"diagnosticsLogsRetentionInDays": "30",
+		"azureConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('outputStorageAccountNameReference'), ';AccountKey=', parameters('outputStorageAccountKeyReference'), ';EndpointSuffix=core.windows.net')]",
+		"azureBlobRootURL": "[concat('https://', parameters('outputStorageAccountNameReference'), '.blob.core.windows.net/')]",
+		"appInsightConnectionString": "[concat('InstrumentationKey=',parameters('AppInsightsInstrumentationKey'))]",
+		"media": "media"
+	},
+	"resources": [
+		{
+			"apiVersion": "2015-08-01",
+			"name": "[parameters('webSiteName')]",
+			"type": "Microsoft.Web/sites",
+			"location": "[resourceGroup().location]",
+			"dependsOn": [],
+			"properties": {
+				
+			},
+			"resources": [
+				{
+					"name": "appsettings",
+					"type": "config",
+					"apiVersion": "2018-11-01",
+					"dependsOn": [
+						"[resourceId('Microsoft.Web/Sites/', parameters('webSiteName'))]"
+					],
+					"properties": {
+						"ida:BankValidationApiBaseUrl": "[parameters('ida:BankValidationApiBaseUrl')]",
+						"ida:BankValidationApiToken": "[parameters('ida:BankValidationApiToken')]",
+						"ida:BankValidationApiVersion": "[parameters('ida:BankValidationApiVersion')]",
+						"StorageAccountName": "[parameters('outputStorageAccountNameReference')]",
+						"StorageContainer": "[parameters('outputStorageContainerNameReference')]",
+						"StorageAccountKey": "[parameters('outputStorageAccountKeyReference')]",
+						"XDT_MicrosoftApplicationInsights_Mode": "default",
+						"DIAGNOSTICS_AZUREBLOBRETENTIONINDAYS": "[variables('diagnosticsLogsRetentionInDays')]",
+						"DIAGNOSTICS_AZUREBLOBCONTAINERSASURL": "[parameters('AppLogs_url')]",
+						"WEBSITE_HTTPLOGGING_RETENTION_DAYS": "30",
+						"WEBSITE_HTTPLOGGING_CONTAINER_URL": "[parameters('WebLogs_url')]",
+						"AzureBlobFileSystem.ConnectionString:media": "[variables('azureConnectionString')]",
+						"AzureBlobFileSystem.RootUrl:media": "[variables('azureBlobRootURL')]",
+						"AppInsights_InstrumentationKey": "[parameters('AppInsightsInstrumentationKey')]",
+						"ApplicationInsights_connecion_string": "[variables('appInsightConnectionString')]",
+						"ApplicationInsightsAgent_extention_version": "~2",
+						"AzureBlobFileSystem.ContainerName:media": "[variables('media')]",
+						"ida:ApiToken": "[parameters('ida:ApiToken')]",
+						"ida:ApiBaseUrl": "[parameters('ida:ApiBaseUrl')]"
+					}
+				}
+			]
+		}
+	]
+}

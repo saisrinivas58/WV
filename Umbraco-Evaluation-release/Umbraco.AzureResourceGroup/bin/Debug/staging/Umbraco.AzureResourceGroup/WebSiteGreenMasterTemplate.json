@@ -1,0 +1,434 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"administratorLogin": {
+			"type": "string"
+		},
+		"administratorLoginPassword": {
+			"type": "securestring"
+		},
+		"ida:AADInstance": {
+			"type": "string"
+		},
+		"ida:ClientId": {
+			"type": "string"
+		},
+		"ida:Domain": {
+			"type": "string"
+		},
+		"GitHubFetcherWebServiceURI": {
+			"type": "string"
+		},
+		"_GitHubLocation": {
+			"type": "string"
+		},
+		"_GitHubAccessToken": {
+			"type": "string"
+		},
+		
+		"environmentName": {
+			"type": "string"
+		},
+		
+		"frontendCertData": {
+			"type": "string"
+		},
+		"frontendCertPassword": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		
+		"nestedSQLServerTemplateFile": "[concat(parameters('GitHubFetcherWebServiceURI'), '?githuburi=', parameters('_GitHubLocation'), '/', 'deploySqlServer.json', '&githubaccesstoken=', parameters('_GitHubAccessToken'))]",
+		"nestedHostingPlanTemplateFile": "[concat(parameters('GitHubFetcherWebServiceURI'), '?githuburi=', parameters('_GitHubLocation'), '/', 'deployHostingPlan.json', '&githubaccesstoken=', parameters('_GitHubAccessToken'))]",
+		"nestedStorageAccountTemplateFile": "[concat(parameters('GitHubFetcherWebServiceURI'), '?githuburi=', parameters('_GitHubLocation'), '/', 'deployStorageAccount.json', '&githubaccesstoken=', parameters('_GitHubAccessToken'))]",
+		"nestedWebSiteTemplateFile": "[concat(parameters('GitHubFetcherWebServiceURI'), '?githuburi=', parameters('_GitHubLocation'), '/', 'deployWebSite.json', '&githubaccesstoken=', parameters('_GitHubAccessToken'))]",
+		"nestedAppInsightsTemplateFile":"[concat(parameters('GitHubFetcherWebServiceURI'), '?githuburi=', parameters('_GitHubLocation'), '/', 'deployApplicationInsights.json', '&githubaccesstoken=', parameters('_GitHubAccessToken'))]",
+		"nestedloganalyticsTemplateFile":"[concat(parameters('GitHubFetcherWebServiceURI'), '?githuburi=', parameters('_GitHubLocation'), '/', 'deployLogAnalytics.json', '&githubaccesstoken=', parameters('_GitHubAccessToken'))]",
+		"nestedalertsTemplateFile":"[concat(parameters('GitHubFetcherWebServiceURI'), '?githuburi=', parameters('_GitHubLocation'), '/', 'deployAlerts.json', '&githubaccesstoken=', parameters('_GitHubAccessToken'))]",
+		"nestedApplicationGatewayTemplateFile": "[concat(parameters('GitHubFetcherWebServiceURI'), '?githuburi=', parameters('_GitHubLocation'), '/', 'deployApplicationgateway.json', '&githubaccesstoken=', parameters('_GitHubAccessToken'))]",
+        "resourceGroupWebapp": "[concat(parameters('environmentName'), '-Green-RG')]",
+		"resourceGroupShared": "[concat(parameters('environmentName'), '-Shared-RG')]",
+		"apiVersion": "2017-05-10",
+		"contentVersion": "1.0.0.0",
+		"mode": "Incremental",
+		"sqlserverName": "[toLower(concat(parameters('environmentName'), '-sql-server'))]",
+		"hostingPlanName": "[toLower(concat(parameters('environmentName'), '-Hosting-Plan-Green'))]",
+		"webSiteName": "[toLower(concat(parameters('environmentName'), '-Webapp-Green'))]",
+		"applicationGatewayname": "[concat(parameters('environmentName'), '-AGW')]",
+        "virtualNetworkName": "[concat(parameters('environmentName'), '-Vnet')]",
+		"publicIPAddressName": "[concat(parameters('environmentName'), '-PIP')]",
+		"storageenv":"[replace(parameters('environmentName'), '-', '')]",
+		"storageAccountName": "[toLower(concat(variables('storageenv'), 'storage'))]",
+		"databaseenv":"[replace(parameters('environmentName'), '-', '')]",
+		"databaseName": "[toLower(concat(variables('databaseenv'), 'db'))]",
+		"containerName": "media",
+		"containerAppLogs": "[toLower(concat(parameters('environmentName'), '-app-logs'))]",
+		"containerWebLogs": "[toLower(concat(parameters('environmentName'), '-web-logs'))]",
+		"actionGroupName": "[parameters('environmentName')]",
+		"environmentshortName": "[substring(parameters('environmentName'), 0, 2)]",
+		"actionGroupShortName":"[concat(variables('environmentshortName'), '-sandbox')]",
+		"ida:PostLogoutRedirectUri": "[concat('https://', variables('webSiteName'),'.azurewebsites.net')]",
+		"sqlServerTemplate": "sqlServerTemplate",
+		"hostingPlanTemplate": "hostingPlanTemplate",
+		"storageAccountTemplate": "storageAccountTemplate",
+		"webSiteTemplate": "webSiteTemplate",
+		"AppInsightsName": "[concat(parameters('environmentName'), '-AppInsights')]",
+		"AppInsightsTemplate":"ApplicationInsightsTemplate",
+		"loganalytics_name":"[concat(parameters('environmentName'), '-Loganalytics')]",
+		"loganalyticsTemplate":"LoganalyticsTemplate",
+		"alertsTemplate":"alertsTemplate",
+		"metricName":"cpu_percent",
+		"alertName":"[concat(parameters('environmentName'), '-alerts')]",
+		"alertDescription":"[concat(parameters('environmentName'), '-sql db cpu utilization alert')]",
+		"applicationGatewayTemplate": "applicationGatewayTemplate",
+		"backendAddressPools":"AppGatewayBackendPool",
+		"httpListener":"HttpListener",
+		"requestRoutingRules":"Rule1",
+		"backendHttpSettingsCollection":"HttpSettings",
+		"tier":"Standard_v2",
+		"skuSize":"Standard_v2"
+
+		
+	},
+	"resources": [
+		{
+			"apiVersion": "[variables('apiVersion')]",
+			"name": "[variables('sqlServerTemplate')]",
+			"resourceGroup": "[variables('resourceGroupShared')]",
+			"type": "Microsoft.Resources/deployments",
+			"dependsOn": [
+				"[variables('loganalyticsTemplate')]"
+			],
+			"properties": {
+				"mode": "[variables('mode')]",
+				"templateLink": {
+					"uri": "[variables('nestedSQLServerTemplateFile')]",
+					"contentVersion": "[variables('contentVersion')]"
+				},
+				"parameters": {
+					"administratorLogin": {
+						"value": "[parameters('administratorLogin')]"
+					},
+					"administratorLoginPassword": {
+						"value": "[parameters('administratorLoginPassword')]"
+					},
+					"sqlserverName": {
+						"value": "[variables('sqlserverName')]"
+					},
+					"databaseName": {
+						"value": "[variables('databaseName')]"
+					},
+					"loganalyticsid":{
+						"value":"[reference(variables('loganalyticsTemplate')).outputs.loganalyticsid.value]"
+					}
+				}
+			}
+		},
+		{
+			"apiVersion": "[variables('apiVersion')]",
+			"name": "[variables('hostingPlanTemplate')]",
+			"resourceGroup": "[variables('resourceGroupWebapp')]",
+			"type": "Microsoft.Resources/deployments",
+			"properties": {
+				"mode": "[variables('mode')]",
+				"templateLink": {
+					"uri": "[variables('nestedHostingPlanTemplateFile')]",
+					"contentVersion": "[variables('contentVersion')]"
+				},
+				"parameters": {
+					"hostingPlanName": {
+						"value": "[variables('hostingPlanName')]"
+					}
+				}
+			}
+		},
+		{
+			"apiVersion": "[variables('apiVersion')]",
+			"name": "[variables('storageAccountTemplate')]",
+			"resourceGroup": "[variables('resourceGroupShared')]",
+			"type": "Microsoft.Resources/deployments",
+			"properties": {
+				"mode": "[variables('mode')]",
+				"templateLink": {
+					"uri": "[variables('nestedStorageAccountTemplateFile')]",
+					"contentVersion": "[variables('contentVersion')]"
+				},
+				"parameters": {
+					"storageAccountName": {
+						"value": "[variables('storageAccountName')]"
+					},
+					"containerName": {
+						"value": "[variables('containerName')]"
+					},
+					"containerWebLogs": {
+						"value": "[variables('containerWebLogs')]"
+					},
+					"containerAppLogs": {
+						"value": "[variables('containerAppLogs')]"
+					}
+
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('apiVersion')]",
+			"resourceGroup": "[variables('resourceGroupShared')]",
+			"name": "[variables('AppInsightsTemplate')]",
+			"properties": {
+				"mode": "[variables('mode')]",
+				"templateLink": {
+					"uri": "[variables('nestedAppInsightsTemplateFile')]",
+					"contentVersion": "[variables('contentVersion')]"
+				},
+				"parameters": {		
+					"AppInsightsName": {
+						"Value": "[variables('AppInsightsName')]"
+					}
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('apiVersion')]",
+			"name": "[variables('loganalyticsTemplate')]",
+			"resourceGroup": "[variables('resourceGroupShared')]",
+			"properties": {
+				"mode": "[variables('mode')]",
+				"templateLink": {
+					"uri": "[variables('nestedloganalyticsTemplateFile')]",
+					"contentVersion": "[variables('contentVersion')]"
+				},
+				"parameters": {
+					
+					"loganalytics_name": {
+						"Value": "[variables('loganalytics_name')]"
+					}
+				}
+			}
+		},
+		{
+			"apiVersion": "[variables('apiVersion')]",
+			"name": "[variables('webSiteTemplate')]",
+			"resourceGroup": "[variables('resourceGroupWebapp')]",
+			"type": "Microsoft.Resources/deployments",
+			"dependsOn": [
+				"[variables('hostingPlanTemplate')]",
+				"[variables('sqlServerTemplate')]",
+				"[variables('storageAccountTemplate')]",
+				"[variables('AppInsightsTemplate')]"
+			],
+			"properties": {
+				"mode": "[variables('mode')]",
+				"templateLink": {
+					"uri": "[variables('nestedWebSiteTemplateFile')]",
+					"contentVersion": "[variables('contentVersion')]"
+				},
+				"parameters": {
+					"administratorLogin": {
+						"value": "[parameters('administratorLogin')]"
+					},
+					"administratorLoginPassword": {
+						"value": "[parameters('administratorLoginPassword')]"
+					},
+					"ida:AADInstance": {
+						"value": "[parameters('ida:AADInstance')]"
+					},
+					"ida:ClientId": {
+						"value": "[parameters('ida:ClientId')]"
+					},
+					"ida:Domain": {
+						"value": "[parameters('ida:Domain')]"
+					},
+					"ida:PostLogoutRedirectUri": {
+						"value": "[variables('ida:PostLogoutRedirectUri')]"
+					},
+					
+					"sqlserverName": {
+						"value": "[variables('sqlserverName')]"
+					},
+					"databaseName": {
+						"value": "[variables('databaseName')]"
+					},
+					"hostingPlanName": {
+						"value": "[variables('hostingPlanName')]"
+					},
+					"webSiteName": {
+						"value": "[variables('webSiteName')]"
+					},
+					"containerWebLogs": {
+						"value": "[variables('containerWebLogs')]"
+					},
+					"containerAppLogs": {
+						"value": "[variables('containerAppLogs')]"
+					},
+					"outputHostingPlanReference": {
+						"value": "[reference(variables('hostingPlanTemplate')).outputs.outputHostingPlanReference.value]"
+					},
+					"outputStorageAccountNameReference": {
+						"value": "[reference(variables('storageAccountTemplate')).outputs.outputStorageAccountNameReference.value]"
+					},
+					"outputStorageContainerNameReference": {
+						"value": "[reference(variables('storageAccountTemplate')).outputs.outputStorageContainerNameReference.value]"
+					},
+					"outputStorageAccountKeyReference": {
+						"value": "[reference(variables('storageAccountTemplate')).outputs.outputStorageAccountKeyReference.value]"
+					},
+					"AppInsightsInstrumentationKey":{
+						"Value":"[reference(variables('AppInsightsTemplate')).outputs.MyAppInsightsInstrumentationKey.value]"
+					},
+					"AppLogs_url":{
+					"value":"[reference(variables('storageAccountTemplate')).outputs.AppLogs_url.value]"
+					},
+					"WebLogs_url":{
+						"value":"[reference(variables('storageAccountTemplate')).outputs.WebLogs_url.value]"
+					}
+				}
+			}
+			
+		},
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('apiVersion')]",
+			"resourceGroup": "[variables('resourceGroupShared')]",
+			"name": "[variables('alertsTemplate')]",
+			"properties": {
+				"mode": "[variables('mode')]",
+				"templateLink": {
+					"uri": "[variables('nestedalertsTemplateFile')]",
+					"contentVersion": "[variables('contentVersion')]"
+				},
+				"parameters": {
+					
+					"alertName": {
+						
+						"Value": "[variables('alertName')]"
+					    },
+						"alertDescription": {
+						"Value": "[variables('alertDescription')]"
+						},
+						"alertSeverity": {
+							"Value": 3
+						},
+						"isEnabled": {
+							"Value": true
+						},
+						"actionGroupName" : {
+						"Value": "[variables('actionGroupName')]"
+					    },
+				         "actionGroupShortName": {
+						  "Value": "[variables('actionGroupShortName')]"
+						 },
+				        "metricName": {
+						  "Value": "[variables('metricName')]"
+						},
+						"operator": {
+						  "Value": "GreaterThan"
+						},
+						"threshold": {
+							"Value": "70"
+						},
+						"timeAggregation": {
+							"Value": "Average"				
+						},
+						"resourceId": {
+						  
+						"Value":"[reference(variables('sqlServerTemplate')).outputs.sqlrefernceid.value]"
+						
+						},
+						"windowSize": {
+							"Value": "PT5M"
+						},
+						"evaluationFrequency": {
+							"Value": "PT1M"
+						}
+					}
+			}
+			
+		},
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('apiVersion')]",
+			"resourceGroup": "[variables('resourceGroupShared')]",
+			"name": "[variables('applicationGatewayTemplate')]",
+			"dependsOn": [
+				"[variables('sqlServerTemplate')]",
+				"[variables('hostingPlanTemplate')]",
+				"[variables('storageAccountTemplate')]",
+				"[variables('webSiteTemplate')]"
+			],
+			"properties": {
+				"mode": "[variables('mode')]",
+				"templateLink": {
+					"uri": "[variables('nestedApplicationGatewayTemplateFile')]",
+					"contentVersion": "[variables('contentVersion')]"
+				},
+				"parameters": {
+				
+				"webSiteName":{
+					"value":"[variables('webSiteName')]"
+				},
+				"subnetName":{
+					"value":"[parameters('environmentName')]"
+				},
+				"backendHttpSettingsCollection":{
+                     "value":"[variables('backendHttpSettingsCollection')]"
+        		},
+
+				"resourceGroupShared":{
+					"value":"[variables('resourceGroupShared')]"
+				},
+				"applicationGatewayName": {
+					"value": "[variables('applicationGatewayName')]"
+				},
+				"tier": {
+					"value": "[variables('tier')]"
+				},
+				"skuSize": {
+					"value": "[variables('skuSize')]"
+				},
+				"capacity": {
+					"value": 2
+				},
+				
+				"virtualNetworkName": {
+					"value": "[variables('virtualNetworkName')]"
+				},
+				"virtualNetworkPrefix": {
+					"value": [
+						"10.1.0.0/16"
+					]
+				},
+					"zones": {
+					"value": []
+				},
+				"publicIpZones": {
+					"value": []
+				},
+				"publicIpAddressName": {
+					"value": "[variables('publicIPAddressName')]"
+				},
+				"backendAddressPools":{
+					"value":"[variables('backendAddressPools')]"
+				},
+				"httpListener":{
+					"value":"[variables('httpListener')]"
+				},
+				"requestRoutingRules":{
+					"value":"[variables('requestRoutingRules')]"
+				 },
+				"frontendCertData": {
+					"value": "[parameters('frontendCertData')]"
+				},
+				"frontendCertPassword": {
+					"value": "[parameters('frontendCertPassword')]"
+				}
+		
+        		
+			   }
+			}
+		}			
+	]
+}

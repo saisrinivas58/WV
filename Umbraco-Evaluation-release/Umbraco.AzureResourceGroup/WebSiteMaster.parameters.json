@@ -1,0 +1,79 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"administratorLogin": {
+			"value": "Login-UMB-Staging-Secret"
+		},
+		"administratorLoginPassword": {
+			"value": "PWD-UMB-Staging-Secret"
+		},
+		"ida:BankValidationApiBaseUrl": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "UMB-BankValidation-API-BaseURL"
+	          }
+		},
+		"ida:BankValidationApiToken": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "UMB-BankValidation-API-Token"
+	          }
+		},
+		"ida:BankValidationApiVersion": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "UMB-BankValidation-API-Version"
+	          }
+		},
+		"GitHubFetcherWebServiceURI": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "Common-GitHub-Access-URL"
+	          }
+		},
+		"_GitHubLocation": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "UMB-Github-Location"
+	          }
+		},
+		"_GitHubAccessToken": {
+			"reference": {
+	            "keyVault": {
+	              "id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+	            },
+	            "secretName": "Common-GitHub-Access-Token"
+	          }
+		},
+		"environmentName": {
+			"value": "UMB-Staging"
+		},
+		"ida:ApiToken": {
+			"reference": {
+				"keyVault": {
+					"id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+				},
+				"secretName": "Common-API-Token"
+			}
+		},
+		"ida:ApiBaseUrl": {
+			"reference": {
+				"keyVault": {
+					"id": "/subscriptions/b39db650-2ae6-4e43-98cd-2a21da688c6f/resourceGroups/KeyVault-RG/providers/Microsoft.KeyVault/vaults/KeyVault-WVUK"
+				},
+				"secretName": "Common-API-Base-URL"
+			}
+		}
+	}
+}
